@@ -456,6 +456,74 @@
 
     .offer-desc { font-size: 0.85rem; color: var(--muted); line-height: 1.6; font-weight: 300; }
 
+    /* ─── MEMES ─── */
+    .memes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .meme-card {
+      background: var(--navy2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+      transition: border-color 0.3s, transform 0.3s;
+    }
+
+    .meme-card:hover { border-color: rgba(201,168,76,0.5); transform: translateY(-4px); }
+
+    .meme-card img {
+      width: 100%;
+      height: 260px;
+      object-fit: cover;
+      display: block;
+      cursor: zoom-in;
+    }
+
+    /* ─── LIGHTBOX ─── */
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: rgba(0,0,0,0.92);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    .lightbox.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .lightbox img {
+      max-width: 92vw;
+      max-height: 92vh;
+      object-fit: contain;
+      border-radius: 6px;
+      box-shadow: 0 8px 60px rgba(0,0,0,0.8);
+    }
+
+    .lightbox-close {
+      position: absolute;
+      top: 20px;
+      right: 24px;
+      background: none;
+      border: none;
+      color: var(--white);
+      font-size: 2rem;
+      cursor: pointer;
+      line-height: 1;
+      opacity: 0.7;
+      transition: opacity 0.2s;
+    }
+
+    .lightbox-close:hover { opacity: 1; }
+
     /* ─── FOOTER ─── */
     footer {
       position: relative;
@@ -744,19 +812,20 @@
 <!-- DRAWER -->
 <div class="drawer" id="drawer">
   <div class="drawer-section">
-    <div class="drawer-label">Serwer </div>
+    <div class="drawer-label">Serwer</div>
     <a href="#kadra">Kadra &amp; Admini</a>
     <a href="#aktualnosci">Aktualności</a>
     <a href="#oferta">Co oferujemy</a>
+    <a href="#memy">Memy</a>
   </div>
   <div class="drawer-section">
     <div class="drawer-label">Social Media</div>
     <a href="https://www.tiktok.com/@chess.arena1" target="_blank">♟ TikTok</a>
-    <a href="https://discord.gg/dGTYnYGp">♟ Discord</a>
+    <a href="https://discord.com/channels/1488471164430061699/1488471165931622531" target="_blank">♟ Discord</a>
   </div>
   <div class="drawer-section">
     <div class="drawer-label">Dołącz</div>
-    <a href="https://discord.gg/dGTYnYGp" target="_blank">→ Dołącz do serwera</a>
+    <a href="https://discord.com/channels/1488471164430061699/1488471165931622531" target="_blank">→ Dołącz do serwera</a>
   </div>
 </div>
 
@@ -828,7 +897,7 @@
   <h1>Najlepszy <em>Polski</em> Serwer Szachowy</h1>
   <p class="hero-sub">Oferujemy zadanka, quizy, turnieje, eventy i wiele wiele więcej. Dołącz do najlepszej szachowej społeczności na polskim Discordzie.</p>
   <div class="hero-actions">
-    <a href="https://discord.gg/dGTYnYGp" class="btn-primary">♟ Dołącz teraz</a>
+    <a href="https://discord.com/channels/1488471164430061699/1488471165931622531" class="btn-primary">♟ Dołącz teraz</a>
   </div>
 </div>
 
@@ -867,6 +936,25 @@
       <div class="offer-name">Eventy</div>
       <div class="offer-desc">Specjalne wydarzenia i niespodzianki dla społeczności.</div>
     </div>
+    <div class="offer-card">
+      <div class="offer-icon">🤣</div>
+      <div class="offer-name">Memy</div>
+      <div class="offer-desc">Wybitne memy szachowe na tej stronie.</div>
+    </div>
+
+  </div>
+</section>
+
+<section id="memy" class="reveal">
+  <p class="section-label">Memy</p>
+  <h2 class="section-title">Szachowe śmieszki</h2>
+  <div class="memes-grid">
+    <div class="meme-card"><img src="Memes/mem1.jpg" alt="Mem 1"/></div>
+    <div class="meme-card"><img src="Memes/mem2.jpg" alt="Mem 2"/></div>
+    <div class="meme-card"><img src="Memes/mem3.jpg" alt="Mem 3"/></div>
+    <div class="meme-card"><img src="Memes/mem4.webp" alt="Mem 4"/></div>
+    <div class="meme-card"><img src="Memes/mem5.jpg" alt="Mem 5"/></div>
+    <div class="meme-card"><img src="Memes/mem6.jpg" alt="Mem 6"/></div>
   </div>
 </section>
 
@@ -886,12 +974,18 @@
   <div class="stats-grid" id="kadra-grid"></div>
 </section>
 
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" id="lightbox-close">✕</button>
+  <img id="lightbox-img" src="" alt=""/>
+</div>
+
 <!-- FOOTER -->
 <footer>
   <div class="footer-logo">♛ Chess Arena</div>
   <div class="social-links">
     <a href="https://www.tiktok.com/@chess.arena1" target="_blank">TikTok</a>
-    <a href="https://discord.gg/dGTYnYGp" target="_blank">Discord</a>
+    <a href="https://discord.com/channels/1488471164430061699/1488471165931622531" target="_blank">Discord</a>
   </div>
   <p>© 2026 Chess Arena · Najlepszy Polski Serwer Szachowy</p>
 </footer>
@@ -923,7 +1017,7 @@
   // ── ALLOWED MANAGERS ──
   // Add both your Gmail addresses here
   const ALLOWED_MANAGERS = [
-    "tomawasielewski@gmail.com",      
+    "tomawasielewski@gmail.com",
     "fake.1.1.11.konto.10@gmail.com"
   ];
 
@@ -1179,6 +1273,30 @@
   // INIT
   // ══════════════════════════════════════════
   loadNews();
+
+  // ══════════════════════════════════════════
+  // LIGHTBOX
+  // ══════════════════════════════════════════
+  const lightbox     = document.getElementById('lightbox');
+  const lightboxImg  = document.getElementById('lightbox-img');
+  const lightboxClose = document.getElementById('lightbox-close');
+
+  document.querySelectorAll('.meme-card img').forEach(img => {
+    img.addEventListener('click', () => {
+      lightboxImg.src = img.src;
+      lightbox.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    });
+  });
+
+  function closeLightbox() {
+    lightbox.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  lightboxClose.addEventListener('click', closeLightbox);
+  lightbox.addEventListener('click', e => { if (e.target === lightbox) closeLightbox(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
 </script>
 </body>
 </html>
