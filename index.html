@@ -1,923 +1,1303 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pl">
 <head>
-<meta charset="UTF-8">
-<title>LAS VEGAS GP // 2026 // 22 CARS</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Monoton&family=Bebas+Neue&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --bg: #05050a;
-    --bg-2: #0a0a14;
-    --grid: #15152a;
-    --neon-pink: #ff2d95;
-    --neon-cyan: #00e6ff;
-    --neon-yellow: #ffd60a;
-    --text: #e8e8ea;
-    --dim: #6b6b85;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body {
-    height: 100%;
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'JetBrains Mono', monospace;
-    overflow: hidden;
-  }
-  body {
-    background:
-      radial-gradient(ellipse 80% 50% at 50% 0%, rgba(255,45,149,0.12) 0%, transparent 60%),
-      radial-gradient(ellipse 60% 40% at 100% 100%, rgba(0,230,255,0.08) 0%, transparent 60%),
-      linear-gradient(var(--grid) 1px, transparent 1px) 0 0 / 40px 40px,
-      linear-gradient(90deg, var(--grid) 1px, transparent 1px) 0 0 / 40px 40px,
-      var(--bg);
-    display: grid;
-    grid-template-columns: 1fr 300px;
-    grid-template-rows: 56px 1fr 40px;
-  }
-  header {
-    background: var(--bg-2);
-    border-bottom: 1px solid var(--grid);
-    display: flex;
-    align-items: center;
-    padding: 0 24px;
-    gap: 24px;
-  }
-  .logo {
-    font-family: 'Monoton', cursive;
-    font-size: 28px;
-    letter-spacing: 4px;
-    background: linear-gradient(90deg, var(--neon-pink), var(--neon-yellow), var(--neon-cyan));
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    text-shadow: 0 0 30px rgba(255, 45, 149, 0.3);
-  }
-  .logo::before {
-    content: "●";
-    color: var(--neon-pink);
-    margin-right: 10px;
-    -webkit-text-fill-color: var(--neon-pink);
-    animation: blink 1.2s infinite;
-    text-shadow: 0 0 12px var(--neon-pink);
-  }
-  @keyframes blink { 50% { opacity: 0.2; } }
-  .session {
-    color: var(--dim);
-    font-size: 11px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-  }
-  .session b { color: var(--neon-cyan); font-weight: 700; }
-  .top-stats {
-    margin-left: auto;
-    display: flex;
-    gap: 28px;
-    font-size: 11px;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    color: var(--dim);
-  }
-  .top-stats span b {
-    color: var(--text);
-    font-weight: 700;
-    margin-left: 6px;
-  }
-  main {
-    position: relative;
-    overflow: hidden;
-    background: var(--bg);
-  }
-  canvas { display: block; width: 100%; height: 100%; }
-  .corner-label {
-    position: absolute;
-    top: 16px;
-    left: 16px;
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 12px;
-    letter-spacing: 3px;
-    color: var(--dim);
-    pointer-events: none;
-  }
-  .corner-label b { color: var(--neon-cyan); }
-  .br {
-    position: absolute;
-    bottom: 16px;
-    right: 16px;
-    font-size: 10px;
-    letter-spacing: 2px;
-    color: var(--dim);
-    text-transform: uppercase;
-    pointer-events: none;
-  }
-  footer {
-    background: var(--bg-2);
-    border-top: 1px solid var(--grid);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 24px;
-    font-size: 10px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--dim);
-  }
-  footer .controls { display: flex; gap: 16px; align-items: center; }
-  button {
-    background: transparent;
-    border: 1px solid var(--grid);
-    color: var(--text);
-    font-family: inherit;
-    font-size: 10px;
-    letter-spacing: 2px;
-    padding: 6px 14px;
-    cursor: pointer;
-    text-transform: uppercase;
-    transition: all 0.15s;
-  }
-  button:hover { border-color: var(--neon-pink); color: var(--neon-pink); }
-  button.active {
-    background: var(--neon-pink);
-    color: var(--bg);
-    border-color: var(--neon-pink);
-    box-shadow: 0 0 12px rgba(255, 45, 149, 0.5);
-  }
-  header { grid-column: 1 / -1; }
-  footer { grid-column: 1 / -1; }
-  aside {
-    background: var(--bg-2);
-    border-left: 1px solid var(--grid);
-    overflow-y: auto;
-    overflow-x: hidden;
-  }
-  aside::-webkit-scrollbar { width: 4px; }
-  aside::-webkit-scrollbar-thumb { background: var(--grid); }
-  .timing-head {
-    padding: 14px 16px 10px;
-    border-bottom: 1px solid var(--grid);
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 18px;
-    letter-spacing: 3px;
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-  }
-  .timing-head small {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    color: var(--dim);
-    letter-spacing: 1px;
-  }
-  .lap-bar {
-    padding: 7px 16px;
-    border-bottom: 1px solid var(--grid);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 11px;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    color: var(--dim);
-  }
-  .lap-bar b { color: var(--neon-cyan); font-size: 13px; font-weight: 800; }
-  .row {
-    display: grid;
-    grid-template-columns: 26px 4px 1fr 58px;
-    align-items: center;
-    gap: 8px;
-    padding: 7px 14px;
-    border-bottom: 1px solid #10101e;
-    font-size: 12px;
-    transition: background 0.15s;
-  }
-  .row:hover { background: #12122a; }
-  .pos { font-weight: 800; color: var(--text); font-size: 13px; text-align: center; }
-  .pos.p1 { color: var(--neon-yellow); text-shadow: 0 0 8px var(--neon-yellow); }
-  .pos.p2 { color: #c0c0c8; }
-  .pos.p3 { color: #cd7f32; }
-  .swatch { width: 4px; height: 18px; border-radius: 1px; }
-  .dname { font-size: 11px; letter-spacing: 1px; text-transform: uppercase; }
-  .dname .team { color: var(--dim); font-size: 9px; }
-  .gap { text-align: right; color: var(--dim); font-size: 10px; letter-spacing: 0.5px; }
-  .gap.leader { color: var(--neon-cyan); font-weight: 700; }
-  .pit-badge {
-    display: inline-block;
-    background: var(--neon-yellow);
-    color: var(--bg);
-    font-size: 8px;
-    font-weight: 800;
-    padding: 1px 4px;
-    border-radius: 2px;
-    letter-spacing: 1px;
-    margin-left: 4px;
-  }
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Chess Arena – Najlepszy Polski Serwer Szachowy</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --navy:   #0b1120;
+      --navy2:  #111d35;
+      --navy3:  #162040;
+      --gold:   #c9a84c;
+      --gold2:  #e8c96a;
+      --gold3:  #f5e0a0;
+      --white:  #f0ece4;
+      --muted:  #8a9bbf;
+      --border: rgba(201,168,76,0.18);
+      --red:    #e05555;
+      --green:  #4caf7d;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--navy);
+      color: var(--white);
+      font-family: 'Crimson Pro', Georgia, serif;
+      font-size: 18px;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: repeating-conic-gradient(rgba(201,168,76,0.03) 0% 25%, transparent 0% 50%);
+      background-size: 60px 60px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ─── NAV ─── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 40px;
+      background: rgba(11,17,32,0.85);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+
+    .nav-logo img {
+      height: 42px; width: 42px;
+      object-fit: contain;
+      border-radius: 8px;
+    }
+
+    .nav-logo span {
+      font-family: 'Cinzel', serif;
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--gold);
+      letter-spacing: 0.08em;
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    /* Manager login button in nav */
+    #nav-manager-btn {
+      font-family: 'Cinzel', serif;
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 7px 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-transform: uppercase;
+    }
+
+    #nav-manager-btn:hover { color: var(--gold); border-color: var(--gold); }
+    #nav-manager-btn.logged-in { color: var(--gold2); border-color: rgba(201,168,76,0.4); }
+
+    /* Hamburger */
+    .hamburger {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      padding: 8px;
+      border: none;
+      background: none;
+    }
+
+    .hamburger span {
+      display: block;
+      width: 26px;
+      height: 2px;
+      background: var(--gold);
+      border-radius: 2px;
+      transition: all 0.3s ease;
+      transform-origin: center;
+    }
+
+    .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+    .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    /* Drawer */
+    .drawer {
+      position: fixed;
+      top: 0; right: -320px;
+      width: 300px;
+      height: 100vh;
+      background: var(--navy2);
+      border-left: 1px solid var(--border);
+      z-index: 99;
+      padding: 100px 40px 40px;
+      transition: right 0.35s cubic-bezier(.77,0,.18,1);
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .drawer.open { right: 0; }
+
+    .drawer-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 98;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.35s;
+    }
+
+    .drawer-overlay.open { opacity: 1; pointer-events: all; }
+
+    .drawer-section { margin-bottom: 36px; }
+
+    .drawer-label {
+      font-family: 'Cinzel', serif;
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      color: var(--gold);
+      text-transform: uppercase;
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .drawer a {
+      display: block;
+      color: var(--white);
+      text-decoration: none;
+      font-size: 1rem;
+      padding: 8px 0;
+      transition: color 0.2s;
+      font-weight: 300;
+    }
+
+    .drawer a:hover { color: var(--gold2); }
+
+    /* ─── HERO ─── */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 120px 24px 80px;
+      z-index: 1;
+    }
+
+    .hero-glow {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 600px; height: 600px;
+      background: radial-gradient(ellipse, rgba(201,168,76,0.07) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-logo {
+      width: 130px; height: 130px;
+      object-fit: contain;
+      margin-bottom: 32px;
+      filter: drop-shadow(0 0 30px rgba(201,168,76,0.3));
+      animation: floatLogo 4s ease-in-out infinite;
+    }
+
+    @keyframes floatLogo {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-10px); }
+    }
+
+    .hero-eyebrow {
+      font-family: 'Cinzel', serif;
+      font-size: 0.7rem;
+      letter-spacing: 0.35em;
+      color: var(--gold);
+      text-transform: uppercase;
+      margin-bottom: 20px;
+      opacity: 0;
+      animation: fadeUp 0.8s 0.2s forwards;
+    }
+
+    .hero h1 {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(2.2rem, 6vw, 4.2rem);
+      font-weight: 900;
+      line-height: 1.12;
+      color: var(--white);
+      max-width: 800px;
+      opacity: 0;
+      animation: fadeUp 0.8s 0.4s forwards;
+    }
+
+    .hero h1 em { font-style: normal; color: var(--gold2); }
+
+    .hero-sub {
+      font-size: 1.05rem;
+      color: var(--muted);
+      max-width: 560px;
+      line-height: 1.7;
+      margin-top: 20px;
+      font-weight: 300;
+      font-style: italic;
+      opacity: 0;
+      animation: fadeUp 0.8s 0.6s forwards;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 16px;
+      margin-top: 40px;
+      flex-wrap: wrap;
+      justify-content: center;
+      opacity: 0;
+      animation: fadeUp 0.8s 0.8s forwards;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 36px;
+      background: linear-gradient(135deg, var(--gold), var(--gold2));
+      color: var(--navy);
+      font-family: 'Cinzel', serif;
+      font-weight: 700;
+      font-size: 0.85rem;
+      letter-spacing: 0.12em;
+      text-decoration: none;
+      border-radius: 3px;
+      text-transform: uppercase;
+      transition: all 0.25s;
+      box-shadow: 0 4px 24px rgba(201,168,76,0.25);
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(201,168,76,0.4);
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─── SECTIONS ─── */
+    section {
+      position: relative;
+      z-index: 1;
+      padding: 80px 24px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .section-label {
+      font-family: 'Cinzel', serif;
+      font-size: 0.65rem;
+      letter-spacing: 0.3em;
+      color: var(--gold);
+      text-transform: uppercase;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 50px;
+      color: var(--white);
+    }
+
+    /* ─── ABOUT ─── */
+    .about-card {
+      background: var(--navy2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 48px 52px;
+      font-size: 1.1rem;
+      line-height: 1.85;
+      color: var(--white);
+      font-weight: 300;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .about-card::before {
+      content: '♛';
+      position: absolute;
+      right: 30px; top: 20px;
+      font-size: 8rem;
+      color: rgba(201,168,76,0.05);
+      line-height: 1;
+    }
+
+    /* ─── STATS / KADRA ─── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+    }
+
+    .kadra-card {
+      background: var(--navy2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 36px 28px;
+      text-align: center;
+      transition: border-color 0.3s, transform 0.3s;
+    }
+
+    .kadra-card:hover { border-color: rgba(201,168,76,0.5); transform: translateY(-4px); }
+    .kadra-icon { font-size: 2rem; margin-bottom: 12px; }
+
+    .kadra-name {
+      font-family: 'Cinzel', serif;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--gold2);
+      margin-bottom: 6px;
+    }
+
+    .kadra-role {
+      font-size: 0.82rem;
+      color: var(--muted);
+      letter-spacing: 0.06em;
+      font-weight: 300;
+    }
+
+    /* ─── NEWS ─── */
+    .news-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 24px;
+    }
+
+    .news-card {
+      background: var(--navy2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 28px 30px;
+      transition: border-color 0.3s, transform 0.3s;
+    }
+
+    .news-card:hover { border-color: rgba(201,168,76,0.4); transform: translateY(-3px); }
+
+    .news-date {
+      font-family: 'Cinzel', serif;
+      font-size: 0.62rem;
+      letter-spacing: 0.2em;
+      color: var(--gold);
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .news-title {
+      font-family: 'Cinzel', serif;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--white);
+      margin-bottom: 12px;
+      line-height: 1.4;
+    }
+
+    .news-excerpt {
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.7;
+      font-weight: 300;
+    }
+
+    .news-loading {
+      text-align: center;
+      color: var(--muted);
+      font-style: italic;
+      padding: 40px;
+      font-size: 0.95rem;
+    }
+
+    /* ─── OFFERS ─── */
+    .offers-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 20px;
+    }
+
+    .offer-card {
+      background: var(--navy2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 28px 24px;
+      text-align: center;
+      transition: all 0.3s;
+    }
+
+    .offer-card:hover { border-color: rgba(201,168,76,0.4); background: var(--navy3); }
+    .offer-icon { font-size: 2.4rem; margin-bottom: 14px; }
+
+    .offer-name {
+      font-family: 'Cinzel', serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--gold2);
+      margin-bottom: 8px;
+    }
+
+    .offer-desc { font-size: 0.85rem; color: var(--muted); line-height: 1.6; font-weight: 300; }
+
+    /* ─── MEMES ─── */
+    .memes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .meme-card {
+      background: var(--navy2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+      transition: border-color 0.3s, transform 0.3s;
+    }
+
+    .meme-card:hover { border-color: rgba(201,168,76,0.5); transform: translateY(-4px); }
+
+    .meme-card img {
+      width: 100%;
+      height: 260px;
+      object-fit: cover;
+      display: block;
+      cursor: zoom-in;
+    }
+
+    /* ─── LIGHTBOX ─── */
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: rgba(0,0,0,0.92);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    .lightbox.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .lightbox img {
+      max-width: 92vw;
+      max-height: 92vh;
+      object-fit: contain;
+      border-radius: 6px;
+      box-shadow: 0 8px 60px rgba(0,0,0,0.8);
+    }
+
+    .lightbox-close {
+      position: absolute;
+      top: 20px;
+      right: 24px;
+      background: none;
+      border: none;
+      color: var(--white);
+      font-size: 2rem;
+      cursor: pointer;
+      line-height: 1;
+      opacity: 0.7;
+      transition: opacity 0.2s;
+    }
+
+    .lightbox-close:hover { opacity: 1; }
+
+    /* ─── FOOTER ─── */
+    footer {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 48px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    footer .footer-logo { font-family: 'Cinzel', serif; font-size: 1rem; color: var(--gold); margin-bottom: 12px; }
+
+    .social-links { display: flex; justify-content: center; gap: 20px; margin: 16px 0; }
+
+    .social-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      letter-spacing: 0.08em;
+      transition: color 0.2s;
+    }
+
+    .social-links a:hover { color: var(--gold2); }
+
+    /* ─── SCROLL REVEAL ─── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+
+    .reveal.visible { opacity: 1; transform: none; }
+
+    /* ─── MODAL OVERLAY ─── */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(4px);
+    }
+
+    .modal-backdrop.open { display: flex; }
+
+    .modal {
+      background: var(--navy2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 48px 44px;
+      max-width: 520px;
+      width: 90%;
+      position: relative;
+      animation: fadeUp 0.3s ease forwards;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 16px; right: 20px;
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 1.4rem;
+      cursor: pointer;
+      transition: color 0.2s;
+      line-height: 1;
+    }
+
+    .modal-close:hover { color: var(--gold); }
+
+    .modal-title {
+      font-family: 'Cinzel', serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--gold2);
+      margin-bottom: 8px;
+    }
+
+    .modal-sub {
+      font-size: 0.88rem;
+      color: var(--muted);
+      margin-bottom: 32px;
+      font-weight: 300;
+      line-height: 1.6;
+    }
+
+    /* ─── FORM STYLES ─── */
+    .field { margin-bottom: 20px; }
+
+    .field label {
+      display: block;
+      font-family: 'Cinzel', serif;
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      color: var(--gold);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .field input,
+    .field textarea {
+      width: 100%;
+      background: var(--navy3);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 12px 16px;
+      color: var(--white);
+      font-family: 'Crimson Pro', Georgia, serif;
+      font-size: 1rem;
+      font-weight: 300;
+      transition: border-color 0.2s;
+      resize: vertical;
+    }
+
+    .field input:focus,
+    .field textarea:focus {
+      outline: none;
+      border-color: rgba(201,168,76,0.5);
+    }
+
+    .field textarea { min-height: 110px; }
+
+    /* Google login button */
+    .btn-google {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      width: 100%;
+      padding: 14px;
+      background: var(--navy3);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--white);
+      font-family: 'Cinzel', serif;
+      font-size: 0.8rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.25s;
+    }
+
+    .btn-google:hover { border-color: rgba(201,168,76,0.5); background: var(--navy2); }
+
+    .btn-google svg { width: 20px; height: 20px; flex-shrink: 0; }
+
+    /* Submit button */
+    .btn-submit {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, var(--gold), var(--gold2));
+      color: var(--navy);
+      font-family: 'Cinzel', serif;
+      font-weight: 700;
+      font-size: 0.82rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.25s;
+      margin-top: 8px;
+      box-shadow: 0 4px 20px rgba(201,168,76,0.2);
+    }
+
+    .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(201,168,76,0.35); }
+    .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    /* Status messages */
+    .status-msg {
+      margin-top: 16px;
+      padding: 12px 16px;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      font-weight: 300;
+      display: none;
+    }
+
+    .status-msg.error { background: rgba(224,85,85,0.12); border: 1px solid rgba(224,85,85,0.3); color: #e05555; display: block; }
+    .status-msg.success { background: rgba(76,175,125,0.12); border: 1px solid rgba(76,175,125,0.3); color: #4caf7d; display: block; }
+
+    /* Manager badge in news section */
+    #manager-add-news-btn {
+      display: none;
+      margin: 0 auto 36px;
+      font-family: 'Cinzel', serif;
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      padding: 11px 28px;
+      background: transparent;
+      border: 1px solid var(--gold);
+      color: var(--gold);
+      border-radius: 3px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-transform: uppercase;
+    }
+
+    #manager-add-news-btn:hover { background: rgba(201,168,76,0.08); }
+
+    /* Divider */
+    .modal-divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 24px 0;
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+
+    .modal-divider::before,
+    .modal-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* Logged-in state inside modal */
+    .manager-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      background: rgba(201,168,76,0.06);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      margin-bottom: 24px;
+    }
+
+    .manager-info img {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .manager-info-text { flex: 1; }
+
+    .manager-info-name {
+      font-family: 'Cinzel', serif;
+      font-size: 0.82rem;
+      color: var(--gold2);
+    }
+
+    .manager-info-email { font-size: 0.78rem; color: var(--muted); font-weight: 300; }
+
+    .btn-logout {
+      background: none;
+      border: 1px solid rgba(224,85,85,0.3);
+      color: #e05555;
+      border-radius: 3px;
+      padding: 5px 10px;
+      font-size: 0.72rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'Cinzel', serif;
+      letter-spacing: 0.06em;
+      white-space: nowrap;
+    }
+
+    .btn-logout:hover { background: rgba(224,85,85,0.1); }
+  </style>
 </head>
 <body>
 
-<header>
-  <div class="logo">LAS&nbsp;VEGAS&nbsp;GP&nbsp;2026</div>
-  <div class="session">SESSION <b>RACE</b> / 22 CARS / NIGHT</div>
-  <div class="top-stats">
-    <span>WEATHER<b>DRY</b></span>
-    <span>AIR<b>12°C</b></span>
-    <span>TRACK<b>18°C</b></span>
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">
+    <img src="chess-arena.png" alt="Chess Arena logo"/>
+    <span>Chess Arena</span>
+  </a>
+  <div class="nav-right">
+    <button id="nav-manager-btn" onclick="openManagerModal()">⚙ Panel</button>
+    <button class="hamburger" id="hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
   </div>
-</header>
+</nav>
 
-<main>
-  <canvas id="track"></canvas>
-  <div class="corner-label">STRIP CIRCUIT // 6.201 KM // <b>50 LAPS</b></div>
-  <div class="br">CANVAS · O(n) PER FRAME · 22 CARS</div>
-</main>
+<!-- DRAWER OVERLAY -->
+<div class="drawer-overlay" id="overlay"></div>
 
-<aside>
-  <div class="timing-head">LIVE TIMING <small id="lapclock">+00:00.000</small></div>
-  <div class="lap-bar">LAP <b id="lapcounter">0 / 50</b></div>
-  <div id="leaderboard"></div>
-</aside>
+<!-- DRAWER -->
+<div class="drawer" id="drawer">
+  <div class="drawer-section">
+    <div class="drawer-label">Serwer</div>
+    <a href="#kadra">Kadra &amp; Admini</a>
+    <a href="#aktualnosci">Aktualności</a>
+    <a href="#oferta">Co oferujemy</a>
+    <a href="#memy">Memy</a>
+    <a href="https://towasi-dot.github.io/Opening-textbook/">Podręcznik debiutów</a>
+  </div>
+  <div class="drawer-section">
+    <div class="drawer-label">Social Media</div>
+    <a href="https://www.tiktok.com/@chess.arena1" target="_blank">♟ TikTok</a>
+    <a href="https://discord.com/channels/1488471164430061699/1488471165931622531" target="_blank">♟ Discord</a>
+  </div>
+  <div class="drawer-section">
+    <div class="drawer-label">Dołącz</div>
+    <a href="https://discord.com/channels/1488471164430061699/1488471165931622531" target="_blank">→ Dołącz do serwera</a>
+  </div>
+</div>
 
+<!-- ══════════════════════════════════════════
+     MANAGER MODAL
+══════════════════════════════════════════ -->
+<div class="modal-backdrop" id="manager-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeManagerModal()">✕</button>
+
+    <!-- STATE A: not logged in -->
+    <div id="state-login">
+      <div class="modal-title">Panel Menedżera</div>
+      <div class="modal-sub">Zaloguj się kontem Google przypisanym do zarządu Chess Arena, aby uzyskać dostęp.</div>
+      <button class="btn-google" onclick="signInWithGoogle()">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+        </svg>
+        Zaloguj przez Google
+      </button>
+      <div class="status-msg" id="login-status"></div>
+    </div>
+
+    <!-- STATE B: logged in — add news form -->
+    <div id="state-form" style="display:none">
+      <div class="modal-title">Dodaj Aktualność</div>
+      <div class="modal-sub">Wypełnij poniższy formularz. Aktualność zostanie dodana natychmiast.</div>
+
+      <div class="manager-info" id="manager-info-bar">
+        <img id="manager-avatar" src="" alt="avatar"/>
+        <div class="manager-info-text">
+          <div class="manager-info-name" id="manager-name">—</div>
+          <div class="manager-info-email" id="manager-email">—</div>
+        </div>
+        <button class="btn-logout" onclick="signOut()">Wyloguj</button>
+      </div>
+
+      <div class="field">
+        <label>Tytuł</label>
+        <input type="text" id="news-title-input" placeholder="np. Turniej weekendowy — wyniki"/>
+      </div>
+      <div class="field">
+        <label>Treść / Zajawka</label>
+        <textarea id="news-excerpt-input" placeholder="Krótki opis aktualności..."></textarea>
+      </div>
+
+      <button class="btn-submit" id="submit-news-btn" onclick="submitNews()">♟ Opublikuj aktualność</button>
+      <div class="status-msg" id="form-status"></div>
+    </div>
+
+    <!-- STATE C: access denied -->
+    <div id="state-denied" style="display:none">
+      <div class="modal-title" style="color:var(--red)">Brak dostępu</div>
+      <div class="modal-sub">To konto Google nie jest przypisane do zarządu Chess Arena. Użyj właściwego konta.</div>
+      <button class="btn-google" onclick="signOut()" style="margin-top:8px">↩ Wyloguj i spróbuj ponownie</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-glow"></div>
+  <img src="chess-arena.png" alt="Chess Arena" class="hero-logo"/>
+  <p class="hero-eyebrow">Discord · Polska · Szachy</p>
+  <h1>Najlepszy <em>Polski</em> Serwer Szachowy</h1>
+  <p class="hero-sub">Oferujemy zadanka, quizy, turnieje, eventy i wiele wiele więcej. Dołącz do najlepszej szachowej społeczności na polskim Discordzie.</p>
+  <div class="hero-actions">
+    <a href="https://discord.com/channels/1488471164430061699/1488471165931622531" class="btn-primary">♟ Dołącz teraz</a>
+  </div>
+</div>
+
+<!-- NEWS -->
+<section id="aktualnosci" class="reveal">
+  <p class="section-label">Aktualności</p>
+  <h2 class="section-title">Co słychać?</h2>
+  <button id="manager-add-news-btn" onclick="openManagerModal()">+ Dodaj aktualność</button>
+  <div class="news-grid" id="news-container">
+    <div class="news-loading">Ładowanie aktualności...</div>
+  </div>
+</section>
+
+<!-- OFFERS -->
+<section id="oferta" class="reveal">
+  <p class="section-label">Co oferujemy</p>
+  <h2 class="section-title">Dlaczego Chess Arena?</h2>
+  <div class="offers-grid">
+    <div class="offer-card">
+      <div class="offer-icon">🧩</div>
+      <div class="offer-name">Zadanka</div>
+      <div class="offer-desc">Codzienne łamigłówki szachowe dla każdego poziomu.</div>
+    </div>
+    <div class="offer-card">
+      <div class="offer-icon">📝</div>
+      <div class="offer-name">Quizy</div>
+      <div class="offer-desc">Sprawdź swoją wiedzę o szachach i historii gry.</div>
+    </div>
+    <div class="offer-card">
+      <div class="offer-icon">🏆</div>
+      <div class="offer-name">Turnieje</div>
+      <div class="offer-desc">Regularne turnieje z prawdziwą rywalizacją.</div>
+    </div>
+    <div class="offer-card">
+      <div class="offer-icon">🎉</div>
+      <div class="offer-name">Eventy</div>
+      <div class="offer-desc">Specjalne wydarzenia i niespodzianki dla społeczności.</div>
+    </div>
+    <div class="offer-card">
+      <div class="offer-icon">🤣</div>
+      <div class="offer-name">Memy</div>
+      <div class="offer-desc">Wybitne memy szachowe na tej stronie.</div>
+    </div>
+
+  </div>
+</section>
+
+<section id="memy" class="reveal">
+  <p class="section-label">Memy</p>
+  <h2 class="section-title">Szachowe śmieszki</h2>
+  <div class="memes-grid">
+    <div class="meme-card"><img src="Memes/mem1.jpg" alt="Mem 1"/></div>
+    <div class="meme-card"><img src="Memes/mem2.jpg" alt="Mem 2"/></div>
+    <div class="meme-card"><img src="Memes/mem3.jpg" alt="Mem 3"/></div>
+    <div class="meme-card"><img src="Memes/mem4.webp" alt="Mem 4"/></div>
+    <div class="meme-card"><img src="Memes/mem5.jpg" alt="Mem 5"/></div>
+    <div class="meme-card"><img src="Memes/mem6.jpg" alt="Mem 6"/></div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="onas" class="reveal">
+  <p class="section-label">O nas</p>
+  <h2 class="section-title">Kim jesteśmy?</h2>
+  <div class="about-card">
+    Chess Arena to serwer, który istnieje od 15.12.2025r. Od tego czasu zostały zrobione dziesiątki turniejów, quizów i codziennych zadań. Mamy miłą atmosferę. Pod koniec roku odbędą się mistrzostwa Discorda, których głównym organizatorem będzie Chess Arena. To pozwoli wyłonić najlepszego szachistę na polskim Discordzie.
+  </div>
+</section>
+
+<!-- KADRA -->
+<section id="kadra" class="reveal">
+  <p class="section-label">Kadra</p>
+  <h2 class="section-title">Nasz team</h2>
+  <div class="stats-grid" id="kadra-grid"></div>
+</section>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" id="lightbox-close">✕</button>
+  <img id="lightbox-img" src="" alt=""/>
+</div>
+
+<!-- FOOTER -->
 <footer>
-  <div>BUILT WITH CANVAS · ZERO DEPENDENCIES</div>
-  <div class="controls">
-    <span>SPEED</span>
-    <button data-speed="0.5">0.5×</button>
-    <button data-speed="1" class="active">1×</button>
-    <button data-speed="2">2×</button>
-    <button data-speed="4">4×</button>
-    <button id="pause">PAUSE</button>
+  <div class="footer-logo">♛ Chess Arena</div>
+  <div class="social-links">
+    <a href="https://www.tiktok.com/@chess.arena1" target="_blank">TikTok</a>
+    <a href="https://discord.com/channels/1488471164430061699/1488471165931622531" target="_blank">Discord</a>
   </div>
+  <p>© 2026 Chess Arena · Najlepszy Polski Serwer Szachowy</p>
 </footer>
 
+<!-- ══════════════════════════════════════════
+     FIREBASE (CDN — no npm needed 😎)
+══════════════════════════════════════════ -->
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
 <script>
-(() => {
-  const canvas = document.getElementById('track');
-  const ctx = canvas.getContext('2d');
-
-  const TEAMS = {
-    MER: { name: 'MERCEDES',     color: '#27F4D2' },
-    WIL: { name: 'WILLIAMS',     color: '#1868DB' },
-    HAA: { name: 'HAAS',         color: '#B6BABD' },
-    FER: { name: 'FERRARI',      color: '#E8002D' },
-    RBR: { name: 'RED BULL',     color: '#4781D7' },
-    RBT: { name: 'RACING BULLS', color: '#6692FF' },
-    AST: { name: 'ASTON MARTIN', color: '#229971' },
-    ALP: { name: 'ALPINE',       color: '#FF87BC' },
-    CAD: { name: 'CADILLAC',     color: '#C8102E' },
-    MCL: { name: 'MCLAREN',      color: '#FF8000' },
-    AUD: { name: 'AUDI',         color: '#52E252' },
+  // ══════════════════════════════════════════
+  // FIREBASE CONFIG
+  // ══════════════════════════════════════════
+  const firebaseConfig = {
+    apiKey: "AIzaSyDqdqO84KGNoSzNxcKCJy2zogBOXIHHdAQ",
+    authDomain: "chess-arena-bd781.firebaseapp.com",
+    projectId: "chess-arena-bd781",
+    storageBucket: "chess-arena-bd781.firebasestorage.app",
+    messagingSenderId: "3313644132",
+    appId: "1:3313644132:web:fbc787b2f9559909ade571"
   };
 
-  const GRID = [
-    ['ANT', 'MER'], ['RUS', 'MER'],
-    ['ALB', 'WIL'], ['SAI', 'WIL'],
-    ['BEA', 'HAA'], ['OCO', 'HAA'],
-    ['HAM', 'FER'], ['LEC', 'FER'],
-    ['VER', 'RBR'], ['HAD', 'RBR'],
-    ['LAW', 'RBT'], ['LIN', 'RBT'],
-    ['ALO', 'AST'], ['STR', 'AST'],
-    ['GAS', 'ALP'], ['COL', 'ALP'],
-    ['BOT', 'CAD'], ['PER', 'CAD'],
-    ['NOR', 'MCL'], ['PIA', 'MCL'],
-    ['HUL', 'AUD'], ['BOR', 'AUD'],
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db   = firebase.firestore();
+
+  // ── ALLOWED MANAGERS ──
+  // Add both your Gmail addresses here
+  const ALLOWED_MANAGERS = [
+    "tomawasielewski@gmail.com",
+    "fake.1.1.11.konto.10@gmail.com"
   ];
 
-  let speedMul = 1;
-  let paused = false;
-  // ── RACE FINISH ───────────────────────────────────────────────
-  // Leader completing this many laps ends the race. Matches the
-  // "50 LAPS" label. raceOver freezes the sim; finishOrder is the
-  // classification snapshot taken at the moment of the chequered flag.
-  const RACE_LAPS = 50;
-  let raceOver = false;
-  let finishOrder = null;
-  let finishTime = null;
-  document.querySelectorAll('button[data-speed]').forEach(b => {
-    b.addEventListener('click', () => {
-      document.querySelectorAll('button[data-speed]').forEach(x => x.classList.remove('active'));
-      b.classList.add('active');
-      speedMul = parseFloat(b.dataset.speed);
+  // ══════════════════════════════════════════
+  // AUTH STATE
+  // ══════════════════════════════════════════
+  let currentUser = null;
+
+  auth.onAuthStateChanged(user => {
+    currentUser = user;
+    const isManager = user && ALLOWED_MANAGERS.includes(user.email);
+
+    // Nav button
+    const navBtn = document.getElementById('nav-manager-btn');
+    navBtn.textContent = isManager ? '⚙ Panel menedżera' : '⚙ Panel';
+    navBtn.classList.toggle('logged-in', !!isManager);
+
+    // "Add news" shortcut above news grid
+    document.getElementById('manager-add-news-btn').style.display = isManager ? 'block' : 'none';
+
+    // If modal is open, refresh its state
+    if (document.getElementById('manager-modal').classList.contains('open')) {
+      updateModalState();
+    }
+  });
+
+  // ══════════════════════════════════════════
+  // MODAL CONTROL
+  // ══════════════════════════════════════════
+  function openManagerModal() {
+    document.getElementById('manager-modal').classList.add('open');
+    updateModalState();
+  }
+
+  function closeManagerModal() {
+    document.getElementById('manager-modal').classList.remove('open');
+    clearStatus();
+  }
+
+  // Close on backdrop click
+  document.getElementById('manager-modal').addEventListener('click', e => {
+    if (e.target === document.getElementById('manager-modal')) closeManagerModal();
+  });
+
+  function updateModalState() {
+    const stateLogin  = document.getElementById('state-login');
+    const stateForm   = document.getElementById('state-form');
+    const stateDenied = document.getElementById('state-denied');
+
+    if (!currentUser) {
+      stateLogin.style.display  = 'block';
+      stateForm.style.display   = 'none';
+      stateDenied.style.display = 'none';
+    } else if (ALLOWED_MANAGERS.includes(currentUser.email)) {
+      stateLogin.style.display  = 'none';
+      stateForm.style.display   = 'block';
+      stateDenied.style.display = 'none';
+      // Fill in user info
+      document.getElementById('manager-name').textContent  = currentUser.displayName || 'Manager';
+      document.getElementById('manager-email').textContent = currentUser.email;
+      document.getElementById('manager-avatar').src        = currentUser.photoURL || '';
+    } else {
+      stateLogin.style.display  = 'none';
+      stateForm.style.display   = 'none';
+      stateDenied.style.display = 'block';
+    }
+  }
+
+  function clearStatus() {
+    ['login-status', 'form-status'].forEach(id => {
+      const el = document.getElementById(id);
+      el.className = 'status-msg';
+      el.textContent = '';
     });
-  });
-  document.getElementById('pause').addEventListener('click', e => {
-    paused = !paused;
-    e.target.textContent = paused ? 'RESUME' : 'PAUSE';
-  });
-
-  function resize() {
-    const dpr = window.devicePixelRatio || 1;
-    canvas.width = canvas.clientWidth * dpr;
-    canvas.height = canvas.clientHeight * dpr;
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
-  window.addEventListener('resize', resize);
-  resize();
 
-  function makeLine(x0, y0, x1, y1) {
-    const dx = x1 - x0, dy = y1 - y0;
-    const L = Math.hypot(dx, dy);
-    return {
-      length: L,
-      at(t) { return [x0 + dx * t, y0 + dy * t]; },
-      tangent() { return [dx / L, dy / L]; },
-    };
-  }
-  // ─────────────────────────────────────────────────────────────
-  // CIRCUIT GEOMETRY — Las Vegas Strip Circuit (17 turns, per formula1.com)
-  // Centerline digitized from the official track map, then fed
-  // through a closed Catmull-Rom spline. Each spline span exposes
-  // the SAME {length, at(t), tangent(t)} interface as makeLine/makeArc,
-  // so the arc-length sampler downstream doesn't know the difference.
-  //
-  // Catmull-Rom (centripetal-ish, uniform α=0.5 form):
-  //   p(t) = 0.5 * [ 2P1
-  //                + (-P0+P2) t
-  //                + (2P0-5P1+4P2-P3) t²
-  //                + (-P0+3P1-3P2+P3) t³ ]
-  // tangent = dp/dt (un-normalized direction; sampler normalizes).
-  // ─────────────────────────────────────────────────────────────
-  const CTRL = [
-    [828.2, 96.9],   // T1
-    [804.6, 78.5],   // T2
-    [845.2, 148.6],  // T3
-    [778.8, 176.7],  // T4
-    [380.0, 196.6],  // T5  (end of Sector 1 straight)
-    [380.0, 82.2],   // T6
-    [302.5, 60.0],   // T7
-    [280.3, 95.4],   // T8
-    [232.3, 63.7],   // T9
-    [228.6, 263.1],  // T10
-    [89.8, 318.5],   // T11
-    [69.8, 399.7],   // T12
-    [302.5, 523.8],  // T13
-    [885.8, 540.0],  // T14
-    [869.6, 501.6],  // T15
-    [926.5, 484.6],  // T16
-    [930.2, 185.5],  // T17
-    [878.5, 144.9],  // run back toward S/F
-  ];
-
-  // One Catmull-Rom span between P1 and P2, given neighbors P0, P3.
-  function makeSpline(p0, p1, p2, p3) {
-    // Polynomial coefficients: p(t) = a + b t + c t² + d t²·t
-    const ax = p1[0], ay = p1[1];
-    const bx = 0.5 * (-p0[0] + p2[0]),               by = 0.5 * (-p0[1] + p2[1]);
-    const cx = 0.5 * (2*p0[0] - 5*p1[0] + 4*p2[0] - p3[0]),
-          cy = 0.5 * (2*p0[1] - 5*p1[1] + 4*p2[1] - p3[1]);
-    const dx = 0.5 * (-p0[0] + 3*p1[0] - 3*p2[0] + p3[0]),
-          dy = 0.5 * (-p0[1] + 3*p1[1] - 3*p2[1] + p3[1]);
-    const at = (t) => [ax + bx*t + cx*t*t + dx*t*t*t,
-                       ay + by*t + cy*t*t + dy*t*t*t];
-    // Approximate arc length by sampling (Riemann sum over the span).
-    const N = 24;
-    let L = 0, prev = at(0);
-    for (let i = 1; i <= N; i++) {
-      const cur = at(i / N);
-      L += Math.hypot(cur[0] - prev[0], cur[1] - prev[1]);
-      prev = cur;
+  // ══════════════════════════════════════════
+  // GOOGLE SIGN IN / OUT
+  // ══════════════════════════════════════════
+  async function signInWithGoogle() {
+    const statusEl = document.getElementById('login-status');
+    try {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      await auth.signInWithPopup(provider);
+      // onAuthStateChanged handles the rest
+    } catch (err) {
+      statusEl.className = 'status-msg error';
+      statusEl.textContent = 'Logowanie nie powiodło się. Spróbuj ponownie.';
+      console.error(err);
     }
-    return {
-      length: L,
-      at(t) { return at(t); },
-      tangent(t) {
-        // dp/dt = b + 2c t + 3d t²  (direction only; caller normalizes)
-        const tx = bx + 2*cx*t + 3*dx*t*t;
-        const ty = by + 2*cy*t + 3*dy*t*t;
-        const m = Math.hypot(tx, ty) || 1;
-        return [tx / m, ty / m];
-      },
-    };
   }
 
-  // Build the closed loop: one spline span per control-point edge,
-  // wrapping indices modulo n so the curve closes smoothly (C¹).
-  const segs = [];
-  const n = CTRL.length;
-  for (let i = 0; i < n; i++) {
-    const p0 = CTRL[(i - 1 + n) % n];
-    const p1 = CTRL[i];
-    const p2 = CTRL[(i + 1) % n];
-    const p3 = CTRL[(i + 2) % n];
-    segs.push(makeSpline(p0, p1, p2, p3));
+  async function signOut() {
+    await auth.signOut();
+    closeManagerModal();
   }
 
-  const cum = [0];
-  for (const s of segs) cum.push(cum[cum.length - 1] + s.length);
-  const TOTAL_LEN = cum[cum.length - 1];
+  // ══════════════════════════════════════════
+  // SUBMIT NEWS → FIRESTORE
+  // ══════════════════════════════════════════
+  async function submitNews() {
+    const title   = document.getElementById('news-title-input').value.trim();
+    const excerpt = document.getElementById('news-excerpt-input').value.trim();
+    const statusEl = document.getElementById('form-status');
+    const btn      = document.getElementById('submit-news-btn');
 
-  // ─────────────────────────────────────────────────────────────
-  // PIT LANE — parallel path just inside the start/finish straight
-  // (the T17 → T1 run, on the right side of the map around x≈905).
-  // Entry: peel off as cars come up toward S/F.
-  // Box:   mid pit lane.
-  // Exit:  rejoin past S/F heading into T1.
-  // ─────────────────────────────────────────────────────────────
-  const PIT_X = 895; // just inside the right straight (track ~x=930)
-  const pitSegs = [];
-  // 1) Entry diagonal: peel off the straight (930, 300) → pit lane (895, 280)
-  pitSegs.push(makeLine(930, 300, PIT_X, 280));
-  // 2) Pit lane straight: (895, 280) → (895, 150)
-  pitSegs.push(makeLine(PIT_X, 280, PIT_X, 150));
-  // 3) Exit diagonal: pit lane (895, 150) → rejoin near S/F (878, 145)
-  pitSegs.push(makeLine(PIT_X, 150, 878, 145));
-
-  const pitCum = [0];
-  for (const s of pitSegs) pitCum.push(pitCum[pitCum.length - 1] + s.length);
-  const PIT_LEN = pitCum[pitCum.length - 1];
-
-  // The "box" — where cars stop for the stop — sits in the middle of segment 2
-  const PIT_BOX_S = pitCum[1] + pitSegs[1].length * 0.5;
-
-  function samplePit(s) {
-    s = Math.max(0, Math.min(PIT_LEN, s));
-    let lo = 0, hi = pitSegs.length - 1;
-    while (lo < hi) {
-      const mid = (lo + hi) >> 1;
-      if (pitCum[mid + 1] <= s) lo = mid + 1; else hi = mid;
-    }
-    const seg = pitSegs[lo];
-    const local = (s - pitCum[lo]) / seg.length;
-    const [x, y] = seg.at(local);
-    const [tx, ty] = seg.tangent(local);
-    return { x, y, tx, ty };
-  }
-
-  function sampleTrack(s) {
-    s = ((s % TOTAL_LEN) + TOTAL_LEN) % TOTAL_LEN;
-    let lo = 0, hi = segs.length - 1;
-    while (lo < hi) {
-      const mid = (lo + hi) >> 1;
-      if (cum[mid + 1] <= s) lo = mid + 1; else hi = mid;
-    }
-    const seg = segs[lo];
-    const local = (s - cum[lo]) / seg.length;
-    const [x, y] = seg.at(local);
-    const [tx, ty] = seg.tangent(local);
-    return { x, y, tx, ty };
-  }
-
-  // Tighter padding + full width = bigger track
-  function transform(nx, ny) {
-    const W = canvas.clientWidth, H = canvas.clientHeight;
-    const pad = 30;
-    const scale = Math.min((W - pad * 2) / 1000, (H - pad * 2) / 600);
-    const ox = (W - 1000 * scale) / 2;
-    const oy = (H - 600 * scale) / 2;
-    return [ox + nx * scale, oy + ny * scale, scale];
-  }
-
-  // ─────────────────────────────────────────────────────────────
-  // TYRES — Vegas is low-deg (smooth surface, cool night temps)
-  // Lifespans in laps. Real noise applied per-car (±15%).
-  // ─────────────────────────────────────────────────────────────
-  const COMPOUNDS = {
-    S: { name: 'SOFT',   baseLife: 18, trailTint: '#ff3344' }, // red
-    M: { name: 'MEDIUM', baseLife: 28, trailTint: '#ffd60a' }, // yellow
-    H: { name: 'HARD',   baseLife: 38, trailTint: '#ffffff' }, // white
-  };
-  const COMPOUND_KEYS = ['S', 'M', 'H'];
-
-  function randomCompound() {
-    return COMPOUND_KEYS[(Math.random() * 3) | 0];
-  }
-  function rollLife(compound) {
-    // ±15% noise — some drivers nurse tyres, some shred them
-    const base = COMPOUNDS[compound].baseLife;
-    return Math.round(base * (0.85 + Math.random() * 0.30));
-  }
-
-  const cars = GRID.map(([driver, teamKey], i) => {
-    const team = TEAMS[teamKey];
-    const startCompound = randomCompound();
-    return {
-      driver,
-      teamKey,
-      teamName: team.name,
-      color: team.color,
-      s: -i * 18,
-      baseSpeed: 1.6 + Math.random() * 0.3,
-      // tyres
-      compound: startCompound,
-      tyreTint: COMPOUNDS[startCompound].trailTint,
-      lapsOnTyre: 0,
-      tyreLife: rollLife(startCompound),
-      // pit lane state machine: 'racing' | 'entering' | 'stopped' | 'exiting'
-      pitState: 'racing',
-      pitS: 0,            // arc-length along pit lane
-      pitFrames: 0,       // frames remaining in stopped phase
-      needsPit: false,    // flagged when tyres expire — pit on next S/F crossing
-    };
-  });
-
-  let frame = 0;
-
-  function buildPath2D() {
-    const path = new Path2D();
-    let first = true;
-    const STEPS = 800;
-    for (let i = 0; i <= STEPS; i++) {
-      const s = (i / STEPS) * TOTAL_LEN;
-      const p = sampleTrack(s);
-      const [px, py] = transform(p.x, p.y);
-      if (first) { path.moveTo(px, py); first = false; }
-      else path.lineTo(px, py);
-    }
-    path.closePath();
-    return path;
-  }
-
-  function drawTrack() {
-    const path = buildPath2D();
-    const [, , scale] = transform(0, 0);
-
-    ctx.save();
-    ctx.shadowColor = 'rgba(255, 45, 149, 0.4)';
-    ctx.shadowBlur = 40;
-    ctx.lineWidth = 42 * scale + 10;
-    ctx.strokeStyle = 'rgba(255, 45, 149, 0.06)';
-    ctx.stroke(path);
-    ctx.restore();
-
-    ctx.lineWidth = 40 * scale;
-    ctx.strokeStyle = '#161620';
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    ctx.stroke(path);
-
-    ctx.lineWidth = 1.5;
-    ctx.strokeStyle = 'rgba(255,255,255,0.25)';
-    ctx.stroke(path);
-
-    ctx.lineWidth = 1;
-    ctx.setLineDash([5, 14]);
-    ctx.strokeStyle = 'rgba(0, 230, 255, 0.2)';
-    ctx.stroke(path);
-    ctx.setLineDash([]);
-
-    // ── PIT LANE ─────────────────────────────────────────────────
-    const pitPath = new Path2D();
-    let firstP = true;
-    const PIT_STEPS = 100;
-    for (let i = 0; i <= PIT_STEPS; i++) {
-      const s = (i / PIT_STEPS) * PIT_LEN;
-      const p = samplePit(s);
-      const [px, py] = transform(p.x, p.y);
-      if (firstP) { pitPath.moveTo(px, py); firstP = false; }
-      else pitPath.lineTo(px, py);
-    }
-    // Pit asphalt (narrower than main track)
-    ctx.lineWidth = 16 * scale;
-    ctx.strokeStyle = '#141420';
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    ctx.stroke(pitPath);
-    // Pit white edges
-    ctx.lineWidth = 1;
-    ctx.strokeStyle = 'rgba(255, 214, 10, 0.5)';
-    ctx.setLineDash([8, 6]);
-    ctx.stroke(pitPath);
-    ctx.setLineDash([]);
-
-    // Pit box marker (yellow rectangle where cars stop)
-    const box = samplePit(PIT_BOX_S);
-    const [bx, by, bs] = transform(box.x, box.y);
-    ctx.strokeStyle = '#ffd60a';
-    ctx.lineWidth = 1.5;
-    ctx.strokeRect(bx - 14 * bs, by - 8 * bs, 28 * bs, 16 * bs);
-
-    // "PIT LANE" label (near the start/finish straight)
-    const pitLabel = transform(835, 215);
-    ctx.fillStyle = 'rgba(255, 214, 10, 0.7)';
-    ctx.font = '700 10px JetBrains Mono';
-    ctx.textAlign = 'center';
-    ctx.fillText('PIT LANE', pitLabel[0], pitLabel[1]);
-
-    // ── Track annotations ────────────────────────────────────────
-    const lake = transform(500, 420);
-    ctx.fillStyle = 'rgba(0, 230, 255, 0.7)';
-    ctx.font = '700 11px JetBrains Mono';
-    ctx.textAlign = 'center';
-    ctx.fillText('◉ THE SPHERE', lake[0], lake[1]);
-
-    const straight = transform(560, 205);
-    ctx.fillStyle = 'rgba(255, 45, 149, 0.75)';
-    ctx.font = '700 12px JetBrains Mono';
-    ctx.fillText('— LAS VEGAS BLVD —', straight[0], straight[1]);
-  }
-
-  // Pit entry/exit anchors, expressed as arc-length s along the loop.
-  // s=0 sits at CTRL[0] (T1). The pit lane parallels the final straight,
-  // so we anchor entry late in the lap and exit right at the start.
-  // Entry: ~92% of the way around (cars approaching S/F).
-  const PIT_ENTRY_S = TOTAL_LEN * 0.93;
-  // Exit: just after the line, ~1% in (heading into T1).
-  const PIT_EXIT_S = TOTAL_LEN * 0.01;
-  // Pit lane speed multiplier — real F1 is ~80km/h vs ~330km/h on track
-  const PIT_SPEED = 0.30;
-  // 2.5 seconds at native 60fps for the actual stop
-  const PIT_STOP_FRAMES = 150;
-
-  function tickCars() {
-    if (paused || raceOver) return;
-
-    // ── Chequered flag check ──────────────────────────────────────
-    // The leader's completed-lap count is floor(s / TOTAL_LEN). Once the
-    // current race leader reaches RACE_LAPS, freeze everything and snapshot
-    // the final classification (sorted by arc-length progress, P1 first).
-    const lapsDone = Math.max(...cars.map(c => Math.floor(c.s / TOTAL_LEN)));
-    if (lapsDone >= RACE_LAPS) {
-      raceOver = true;
-      finishOrder = [...cars].sort((a, b) => b.s - a.s);
+    if (!title || !excerpt) {
+      statusEl.className = 'status-msg error';
+      statusEl.textContent = 'Wypełnij tytuł i treść.';
       return;
     }
 
-    for (let i = 0; i < cars.length; i++) {
-      const c = cars[i];
+    btn.disabled = true;
+    btn.textContent = 'Publikuję...';
+    statusEl.className = 'status-msg';
 
-      // ─── STATE: racing on main track ───────────────────────────
-      if (c.pitState === 'racing') {
-        const wobble = 0.1 * Math.sin(frame * 0.013 + i * 1.7);
-        const sPrev = c.s;
-        c.s += (c.baseSpeed + wobble) * speedMul;
+    try {
+      await db.collection('news').add({
+        title,
+        excerpt,
+        date:   new Date().toISOString(),
+        author: currentUser.email
+      });
 
-        // Lap detection (anywhere on track)
-        const lapPrev = Math.floor(sPrev / TOTAL_LEN);
-        const lapNow  = Math.floor(c.s   / TOTAL_LEN);
-        if (lapNow > lapPrev && sPrev >= 0) {
-          c.lapsOnTyre++;
-          if (c.lapsOnTyre >= c.tyreLife) c.needsPit = true;
-        }
+      statusEl.className = 'status-msg success';
+      statusEl.textContent = 'Aktualność opublikowana! ♟';
+      document.getElementById('news-title-input').value   = '';
+      document.getElementById('news-excerpt-input').value = '';
 
-        // Pit entry detection: did we cross the pit entry point this lap?
-        // Compute s mod TOTAL_LEN for previous and current.
-        if (c.needsPit && sPrev >= 0) {
-          const sModPrev = ((sPrev % TOTAL_LEN) + TOTAL_LEN) % TOTAL_LEN;
-          const sModNow  = ((c.s   % TOTAL_LEN) + TOTAL_LEN) % TOTAL_LEN;
-          // Detect crossing PIT_ENTRY_S (in linear, non-wrapped progress)
-          const crossed = (sModPrev <= PIT_ENTRY_S && sModNow >= PIT_ENTRY_S)
-                       || (sModPrev > sModNow && (sModNow >= PIT_ENTRY_S || sModPrev <= PIT_ENTRY_S));
-          if (crossed) {
-            c.pitState = 'entering';
-            c.pitS = 0;
-            c.needsPit = false;
-          }
-        }
-      }
+      // Reload news on the page
+      loadNews();
 
-      // ─── STATE: driving down pit lane to the box ───────────────
-      else if (c.pitState === 'entering') {
-        c.pitS += c.baseSpeed * PIT_SPEED * speedMul;
-        if (c.pitS >= PIT_BOX_S) {
-          c.pitS = PIT_BOX_S;
-          c.pitState = 'stopped';
-          c.pitFrames = PIT_STOP_FRAMES;
-        }
-      }
-
-      // ─── STATE: stopped at the box (tyre change) ───────────────
-      else if (c.pitState === 'stopped') {
-        // Pit stop time is REAL — doesn't speed up with sim multiplier
-        // (otherwise 4× speed would skip the whole stop)
-        c.pitFrames--;
-        if (c.pitFrames <= 0) {
-          // New random tyres
-          c.compound = randomCompound();
-          c.tyreTint = COMPOUNDS[c.compound].trailTint;
-          c.tyreLife = rollLife(c.compound);
-          c.lapsOnTyre = 0;
-          c.pitState = 'exiting';
-        }
-      }
-
-      // ─── STATE: driving from box to pit exit ───────────────────
-      else if (c.pitState === 'exiting') {
-        c.pitS += c.baseSpeed * PIT_SPEED * speedMul;
-        if (c.pitS >= PIT_LEN) {
-          // Rejoin main track at pit exit point
-          // We need to set c.s such that (c.s mod TOTAL_LEN) == PIT_EXIT_S
-          // Preserve the lap count we were on.
-          const currentLap = Math.floor(c.s / TOTAL_LEN);
-          c.s = currentLap * TOTAL_LEN + PIT_EXIT_S;
-          c.pitState = 'racing';
-        }
-      }
+      // Auto-close modal after 1.5s
+      setTimeout(closeManagerModal, 1500);
+    } catch (err) {
+      statusEl.className = 'status-msg error';
+      statusEl.textContent = 'Błąd zapisu. Sprawdź połączenie i spróbuj ponownie.';
+      console.error(err);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '♟ Opublikuj aktualność';
     }
   }
 
-  function drawCars() {
-    const [, , scale] = transform(0, 0);
-    const carR = 5 * scale + 2;
-    const labelOff = 16 * scale;
+  // ══════════════════════════════════════════
+  // LOAD NEWS FROM FIRESTORE
+  // ══════════════════════════════════════════
+  async function loadNews() {
+    const container = document.getElementById('news-container');
+    container.innerHTML = '<div class="news-loading">Ładowanie aktualności...</div>';
 
-    for (const c of cars) {
-      // Sample position from main track OR pit lane based on state
-      const inPit = c.pitState !== 'racing';
-      const p = inPit ? samplePit(c.pitS) : sampleTrack(c.s);
-      const [x, y] = transform(p.x, p.y);
+    try {
+      const snapshot = await db.collection('news')
+              .orderBy('date', 'desc')
+              .limit(9)
+              .get();
 
-      // Trail behind the car (skip when stopped — no trail when standing still)
-      if (c.pitState !== 'stopped') {
-        const back = inPit ? samplePit(Math.max(0, c.pitS - 7)) : sampleTrack(c.s - 7);
-        const [bx, by] = transform(back.x, back.y);
-        const grad = ctx.createLinearGradient(bx, by, x, y);
-        grad.addColorStop(0, 'transparent');
-        grad.addColorStop(0.6, c.tyreTint + '80');
-        grad.addColorStop(1, c.color);
-        ctx.strokeStyle = grad;
-        ctx.lineWidth = 4;
-        ctx.beginPath();
-        ctx.moveTo(bx, by);
-        ctx.lineTo(x, y);
-        ctx.stroke();
+      if (snapshot.empty) {
+        container.innerHTML = `
+            <div class="news-card">
+              <div class="news-date">15 Grudnia 2025</div>
+              <div class="news-title">Chess Arena oficjalnie otwarta!</div>
+              <div class="news-excerpt">Z dumą ogłaszamy otwarcie najlepszego polskiego serwera szachowego na Discordzie.</div>
+            </div>
+            <div class="news-card">
+              <div class="news-date">Wkrótce</div>
+              <div class="news-title">Mistrzostwa Discorda 2026</div>
+              <div class="news-excerpt">Już wkrótce wyłonimy najlepszego szachistę na całym polskim Discordzie. Szczegóły wkrótce.</div>
+            </div>`;
+        return;
       }
 
-      // Glowing dot — team color
-      ctx.save();
-      ctx.shadowColor = c.color;
-      ctx.shadowBlur = c.pitState === 'stopped' ? 22 : 14; // pulse when stopped
-      ctx.fillStyle = c.color;
-      ctx.beginPath();
-      ctx.arc(x, y, carR, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-
-      // Tyre compound ring
-      ctx.strokeStyle = c.tyreTint;
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.arc(x, y, carR + 2.5, 0, Math.PI * 2);
-      ctx.stroke();
-
-      // "PIT" indicator when stopped — small text below car
-      if (c.pitState === 'stopped') {
-        ctx.fillStyle = '#ffd60a';
-        ctx.font = '700 9px JetBrains Mono';
-        ctx.textAlign = 'center';
-        ctx.fillText('PIT', x, y + carR + 14);
-      }
-
-      // Driver label (perpendicular to direction of travel)
-      const offX = -p.ty * labelOff;
-      const offY = p.tx * labelOff;
-      ctx.fillStyle = '#e8e8ea';
-      ctx.font = '700 10px JetBrains Mono';
-      ctx.textAlign = 'center';
-      ctx.fillText(c.driver, x + offX, y + offY + 3);
+      container.innerHTML = snapshot.docs.map(doc => {
+        const d = doc.data();
+        const dateStr = new Date(d.date).toLocaleDateString('pl-PL', {
+          day: 'numeric', month: 'long', year: 'numeric'
+        });
+        return `
+            <div class="news-card">
+              <div class="news-date">${dateStr}</div>
+              <div class="news-title">${d.title}</div>
+              <div class="news-excerpt">${d.excerpt}</div>
+            </div>`;
+      }).join('');
+    } catch (err) {
+      // Firestore not set up yet — show placeholders
+      container.innerHTML = `
+          <div class="news-card">
+            <div class="news-date">15 Grudnia 2025</div>
+            <div class="news-title">Chess Arena oficjalnie otwarta!</div>
+            <div class="news-excerpt">Z dumą ogłaszamy otwarcie najlepszego polskiego serwera szachowego na Discordzie.</div>
+          </div>
+          <div class="news-card">
+            <div class="news-date">Wkrótce</div>
+            <div class="news-title">Mistrzostwa Discorda 2026</div>
+            <div class="news-excerpt">Już wkrótce wyłonimy najlepszego szachistę na całym polskim Discordzie. Szczegóły wkrótce.</div>
+          </div>`;
+      console.warn('Firestore fetch failed:', err);
     }
   }
 
-  let raceStart = performance.now();
-  let boardTick = 0;
+  // ══════════════════════════════════════════
+  // HAMBURGER / DRAWER
+  // ══════════════════════════════════════════
+  const hamburger = document.getElementById('hamburger');
+  const drawer    = document.getElementById('drawer');
+  const overlay   = document.getElementById('overlay');
 
-  // ─────────────────────────────────────────────────────────────
-  // PODIUM — drawn over the canvas once raceOver is true.
-  // Layout (left → right): SILVER (P2), GOLD (P1), BRONZE (P3).
-  // Heights encode rank: gold tallest, silver medium, bronze shortest.
-  // Each block gets a team-colored ball on top, and the driver's
-  // 3-letter code floats above the ball.
-  // ─────────────────────────────────────────────────────────────
-  function drawPodium() {
-    if (!finishOrder) return;
-    const W = canvas.clientWidth, H = canvas.clientHeight;
-
-    // Dim the track behind the podium.
-    ctx.save();
-    ctx.fillStyle = 'rgba(5, 5, 10, 0.78)';
-    ctx.fillRect(0, 0, W, H);
-
-    // Chequered-flag banner.
-    ctx.fillStyle = '#ffd60a';
-    ctx.font = "800 26px 'Bebas Neue', sans-serif";
-    ctx.textAlign = 'center';
-    ctx.shadowColor = 'rgba(255, 214, 10, 0.6)';
-    ctx.shadowBlur = 24;
-    ctx.fillText('⬛ CHEQUERED FLAG ⬜', W / 2, H * 0.16);
-    ctx.shadowBlur = 0;
-    ctx.fillStyle = 'var(--dim)';
-    ctx.fillStyle = '#6b6b85';
-    ctx.font = "700 12px 'JetBrains Mono', monospace";
-    ctx.fillText(`STRIP CIRCUIT · ${RACE_LAPS} LAPS COMPLETE`, W / 2, H * 0.16 + 24);
-
-    // Block geometry — scales with viewport so it never overflows.
-    const baseY = H * 0.82;                 // common ground line for all blocks
-    const blockW = Math.min(150, W * 0.16);
-    const gap = blockW * 0.18;
-    const cx = W / 2;                        // center (gold sits here)
-    const unit = Math.min(H * 0.14, 90);     // height unit
-
-    // [driverObj, label, blockColor, heightMultiplier, slotIndex(-1,0,1)]
-    const slots = [
-      { car: finishOrder[1], place: 'P2', color: '#c8c8d0', h: 2.0, slot: -1 }, // silver, left, medium
-      { car: finishOrder[0], place: 'P1', color: '#ffd60a', h: 2.8, slot:  0 }, // gold, center, tallest
-      { car: finishOrder[2], place: 'P3', color: '#cd7f32', h: 1.3, slot:  1 }, // bronze, right, shortest
-    ];
-
-    for (const s of slots) {
-      if (!s.car) continue;
-      const bx = cx + s.slot * (blockW + gap) - blockW / 2;
-      const bh = unit * s.h;
-      const by = baseY - bh;
-
-      // Block body
-      ctx.fillStyle = s.color;
-      ctx.shadowColor = s.color;
-      ctx.shadowBlur = 18;
-      ctx.fillRect(bx, by, blockW, bh);
-      ctx.shadowBlur = 0;
-
-      // Subtle top highlight + place label engraved on the block
-      ctx.fillStyle = 'rgba(0,0,0,0.55)';
-      ctx.font = "800 22px 'Bebas Neue', sans-serif";
-      ctx.textAlign = 'center';
-      ctx.fillText(s.place, bx + blockW / 2, by + bh / 2 + 8);
-
-      // Team-name strip under the place
-      ctx.fillStyle = 'rgba(0,0,0,0.45)';
-      ctx.font = "700 9px 'JetBrains Mono', monospace";
-      ctx.fillText(s.car.teamName, bx + blockW / 2, by + bh / 2 + 24);
-
-      // ── Ball on top (team color) ──────────────────────────────
-      const ballR = Math.max(16, blockW * 0.20);
-      const ballX = bx + blockW / 2;
-      const ballY = by - ballR - 6;
-      ctx.save();
-      ctx.shadowColor = s.car.color;
-      ctx.shadowBlur = 26;
-      ctx.fillStyle = s.car.color;
-      ctx.beginPath();
-      ctx.arc(ballX, ballY, ballR, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-      // Glossy rim
-      ctx.strokeStyle = 'rgba(255,255,255,0.55)';
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.arc(ballX, ballY, ballR, 0, Math.PI * 2);
-      ctx.stroke();
-
-      // ── Driver 3-letter code above the ball ───────────────────
-      const code = (s.car.driver || '').slice(0, 3).toUpperCase();
-      ctx.fillStyle = '#ffffff';
-      ctx.font = "800 20px 'JetBrains Mono', monospace";
-      ctx.textAlign = 'center';
-      ctx.shadowColor = s.car.color;
-      ctx.shadowBlur = 12;
-      ctx.fillText(code, ballX, ballY - ballR - 10);
-      ctx.shadowBlur = 0;
-    }
-
-    ctx.restore();
+  function toggleDrawer() {
+    const open = drawer.classList.toggle('open');
+    overlay.classList.toggle('open', open);
+    hamburger.classList.toggle('open', open);
+    document.body.style.overflow = open ? 'hidden' : '';
   }
 
+  hamburger.addEventListener('click', toggleDrawer);
+  overlay.addEventListener('click', toggleDrawer);
+  drawer.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+    if (drawer.classList.contains('open')) toggleDrawer();
+  }));
 
-  function renderBoard() {
-    // Sort by arc-length progress — cars in pit get their main-track s frozen
-    const sorted = [...cars].sort((a, b) => b.s - a.s);
-    const leader = sorted[0];
-    let html = '';
-    sorted.forEach((c, idx) => {
-      const inPit = c.pitState !== 'racing';
-      const gap = idx === 0 ? 'LEADER'
-        : '+' + ((leader.s - c.s) / TOTAL_LEN).toFixed(3) + 'L';
-      const cls = idx === 0 ? 'p1' : idx === 1 ? 'p2' : idx === 2 ? 'p3' : '';
-      const gapCls = idx === 0 ? 'leader' : '';
-      const pitBadge = inPit ? `<span class="pit-badge">${c.pitState === 'stopped' ? 'BOX' : 'PIT'}</span>` : '';
-      html += `<div class="row">
-        <div class="pos ${cls}">${String(idx + 1).padStart(2, '0')}</div>
-        <div class="swatch" style="background:${c.color}"></div>
-        <div class="dname">${c.driver}${pitBadge}<br><span class="team">${c.teamName}</span></div>
-        <div class="gap ${gapCls}">${gap}</div>
-      </div>`;
+  // ══════════════════════════════════════════
+  // SCROLL REVEAL
+  // ══════════════════════════════════════════
+  const revealObserver = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('visible'); revealObserver.unobserve(e.target); }
     });
-    document.getElementById('leaderboard').innerHTML = html;
-    const leaderLap = Math.min(Math.floor(sorted[0].s / TOTAL_LEN) + 1, RACE_LAPS);
-    document.getElementById('lapcounter').textContent = `${leaderLap} / ${RACE_LAPS}`;
-    // Freeze the clock at the chequered flag.
-    if (raceOver && finishTime == null) finishTime = (performance.now() - raceStart) / 1000;
-    const elapsed = raceOver ? finishTime : (performance.now() - raceStart) / 1000;
-    const mm = String(Math.floor(elapsed / 60)).padStart(2, '0');
-    const ss = (elapsed % 60).toFixed(3).padStart(6, '0');
-    document.getElementById('lapclock').textContent = `+${mm}:${ss}`;
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+  // ══════════════════════════════════════════
+  // KADRA
+  // ══════════════════════════════════════════
+  const KADRA = [
+    { icon: '♛',  name: 'Cwaniak',                                    role: 'Właściciel' },
+    { icon: '⚖️', name: 'Kuina, Hyper, Draxiu',                       role: 'Moderatorzy' },
+    { icon: '🤝', name: 'TurTurBS, Kasane Teto, Chess_Mode, Dyktafon', role: 'Pomocnicy' },
+    { icon: '⚙️', name: 'Towasi',                                      role: 'Twórca strony internetowej' },
+    { icon: '🎙️', name: 'Hyper',                                       role: 'Komentatorzy' },
+    { icon: '📋', name: 'Cwaniak, Towasi',                             role: 'Zarząd strony internetowej' }
+  ];
+
+  document.getElementById('kadra-grid').innerHTML = KADRA.map(m => `
+      <div class="kadra-card">
+        <div class="kadra-icon">${m.icon}</div>
+        <div class="kadra-name">${m.name}</div>
+        <div class="kadra-role">${m.role}</div>
+      </div>
+    `).join('');
+
+  // ══════════════════════════════════════════
+  // INIT
+  // ══════════════════════════════════════════
+  loadNews();
+
+  // ══════════════════════════════════════════
+  // LIGHTBOX
+  // ══════════════════════════════════════════
+  const lightbox     = document.getElementById('lightbox');
+  const lightboxImg  = document.getElementById('lightbox-img');
+  const lightboxClose = document.getElementById('lightbox-close');
+
+  document.querySelectorAll('.meme-card img').forEach(img => {
+    img.addEventListener('click', () => {
+      lightboxImg.src = img.src;
+      lightbox.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    });
+  });
+
+  function closeLightbox() {
+    lightbox.classList.remove('open');
+    document.body.style.overflow = '';
   }
 
-  function loop() {
-    const W = canvas.clientWidth, H = canvas.clientHeight;
-    ctx.clearRect(0, 0, W, H);
-    drawTrack();
-    tickCars();
-    if (raceOver) {
-      drawPodium();          // overlay replaces the moving cars
-    } else {
-      drawCars();
-    }
-    if (boardTick++ % 6 === 0) renderBoard();
-    frame++;
-    requestAnimationFrame(loop);
-  }
-  loop();
-})();
+  lightboxClose.addEventListener('click', closeLightbox);
+  lightbox.addEventListener('click', e => { if (e.target === lightbox) closeLightbox(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
 </script>
 </body>
 </html>
